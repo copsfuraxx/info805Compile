@@ -1,0 +1,91 @@
+/* package et imports */
+package fr.usmb.m1isc.compilation.simple;
+import java_cup.runtime.Symbol;
+import java.util.Map;
+import java.util.HashMap;
+
+// nom de la classe a generer
+class SimpleParser;
+
+/* inclusion de code */
+
+action code {: 
+    // pour utilisation dans les actions (classe action)
+    private boolean error = false;
+    private Map<String, Integer> map = new HashMap();
+:};
+
+
+parser code {:
+    // pour le parser (redefinition de la methode reportant les erreurs d'analyse)
+    public void report_error(String message, Object info) {
+        String m = "";
+        if (info instanceof java_cup.runtime.Symbol) {
+            Symbol s = ((Symbol) info);
+            if (s.left >= 0) {
+                /* Ajoute le numero de ligne  */
+                m = m + "Ligne " + (s.left+1) + " ";
+            }
+            if (s.right >= 0) {
+                /* Ajoute le numero de colonne  */
+                m = m + "Colonne " + (s.right+1) + " ";
+            }
+            if (s.left >=0  || s.right >= 0) {
+                m = m + ": ";            
+            }
+        }
+        m = m + "Erreur de syntaxe";
+        System.out.println(m);
+    }
+:};
+
+init with {:
+    //    initialisation du parser
+:};
+
+/* declarations (terminaux, non-terminaux, etc.) */
+/* symboles terminaux */
+terminal PLUS, MOINS, PLUSU, MOINSU, FOIS, DIVISE, POINT, LEFTBRAC, RIGHTBRAC, MODULO, LET, EGAL;
+terminal ERROR;
+terminal String VAR;
+terminal Integer NOMBRE;
+
+/* non terminaux */
+non terminal formule;
+non terminal Integer operation, affectation;
+
+precedence left MODULO;
+precedence left MOINS, PLUS;
+precedence left DIVISE, FOIS;
+precedence left LEFTBRAC, RIGHTBRAC;
+precedence left MOINSU, PLUSU;
+
+/* grammaire */
+
+formule   ::= formule operation:v {:if (error) {System.out.println("ERROR"); error = false;} else System.out.println(v); :} POINT
+          | formule affectation POINT
+          | operation:v {: if (error) {System.out.println("ERROR"); error = false;} else System.out.println(v); :} POINT
+          | affectation POINT
+          | error POINT ;
+
+affectation ::= LET VAR:nom EGAL operation:v {:
+                            if (error) {
+                                System.out.println("ERROR");
+                                error = false;
+                            } else {
+                                map.put(nom,v);
+                                System.out.println(v);
+                            }
+                          :};
+
+operation  ::=  LEFTBRAC operation:v RIGHTBRAC {: RESULT = v; :}
+          | operation:v1 FOIS operation:v2 {: RESULT = v1 * v2; :}
+          | operation:v1 DIVISE operation:v2 {: if (v2 == 0) {error = true; RESULT = 0;} else RESULT = v1 / v2; :}
+          | operation:v1 PLUS operation:v2 {: RESULT = v1 + v2; :}
+          | operation:v1 MOINS operation:v2 {: RESULT = v1 - v2; :}
+          | operation:v1 MODULO operation:v2 {: RESULT = v1 % v2; :}
+          | MOINS operation:v {: RESULT = - v; :} %prec MOINSU
+          | PLUS operation:v {: RESULT = v; :} %prec PLUSU
+          | NOMBRE:v {:  RESULT = v; /*System.out.println(v);*/ :}
+          | VAR:name {:  RESULT = map.get(name); /*System.out.println(v);*/ :};
+
