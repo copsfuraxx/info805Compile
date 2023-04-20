@@ -1,60 +1,56 @@
 package fr.usmb.m1isc.compilation.tp;
 
 public class Node {
+    private static int idWhile = 1;
+    private static int idIf = 1;
 
-    public enum typeNode{
-        PV,
-        LET,
-        NONE,
-        VALUE,
-        VAR,
-        PLUS,
-        MOINS,
-        DIV,
-        MUL,
-        OPERATOR
-    };
-    public typeNode type;
+    private int id;
+
+    public TypeNode type;
     public Object value;
     public Node fil1;
     public Node fil2;
 
     public Node() {
-        type = typeNode.NONE;
+        type = TypeNode.NONE;
         value = null;
         fil1 = null;
         fil2 = null;
     }
 
     public Node(Object value) {
-        type = typeNode.NONE;
+        type = TypeNode.NONE;
         this.value = value;
         fil1 = new Node();
         fil2 = new Node();
     }
 
     public Node(Object value, Node fils, Node fils2) {
-        type = typeNode.NONE;
+        type = TypeNode.NONE;
         this.value = value;
         this.fil1 = fils;
         this.fil2 = fils2;
     }
 
-    public Node(typeNode type,Object value) {
+    public Node(TypeNode type,Object value) {
         this.type = type;
         this.value = value;
         fil1 = new Node();
         fil2 = new Node();
+        switch (type) {
+            case WHILE -> id = idWhile++;
+            case COMPARATOR -> id = idIf++;
+        }
     }
 
-    public Node(typeNode type, Node fils, Node fils2) {
+    public Node(TypeNode type, Node fils, Node fils2) {
         this.type = type;
         this.value = type;
         this.fil1 = fils;
         this.fil2 = fils2;
     }
 
-    public Node(typeNode type, Object value, Node fils, Node fils2) {
+    public Node(TypeNode type, Object value, Node fils, Node fils2) {
         this.type = type;
         this.value = value;
         this.fil1 = fils;
@@ -67,39 +63,66 @@ public class Node {
 
     @Override
     public String toString() {
-        if(this.type == typeNode.PV) {
-            return this.fil1.toString() + this.fil2.toString();
-        } else if (this.type == typeNode.LET) {
-            return this.fil2.toString() +
-                    "\tmov " + this.fil1.value + ", eax\n";
-        } else if (this.type == typeNode.VALUE || this.type == typeNode.VAR) {
-            return "\tmov eax, " + this.value + "\n";
-        } else if(this.type == typeNode.MUL || this.type == typeNode.DIV ||
-                this.type == typeNode.PLUS || this.type == typeNode.MOINS) {
-            String op = "";
-            switch (this.value.toString()) {
-                case "*" :
-                    op = "\tmul eax, ebx\n";
-                    break;
-                case "/" :
-                    op = "\tdiv ebx, eax\n" +
-                            "\tmov eax, ebx\n";
-                    break;
-                case "+" :
-                    op = "\tadd eax, ebx\n";
-                    break;
-                case "-" :
-                    op = "\tsub ebx, eax\n" +
-                            "\tmov eax, ebx\n";
-                    break;
-            }
-            return this.fil1.toString() +
-                    "\tpush eax\n" +
-                    this.fil2.toString()  +
-                    "\tpop ebx\n" +
-                    op;
+        switch (this.type) {
+            case PV :
+                return this.fil1.toString() + this.fil2.toString();
+            case LET:
+                return this.fil2.toString() +
+                        "\tmov " + this.fil1.value + ", eax\n";
+            case VAR:
+                return "\tmov eax, " + this.value + "\n";
+            case VALUE:
+                return "\tmov eax, " + this.value + "\n";
+            case OPERATOR:
+                String op = "";
+                switch (this.value.toString()) {
+                    case "*" :
+                        op = "\tmul eax, ebx\n";
+                        break;
+                    case "/" :
+                        op = "\tdiv ebx, eax\n" +
+                                "\tmov eax, ebx\n";
+                        break;
+                    case "+" :
+                        op = "\tadd eax, ebx\n";
+                        break;
+                    case "-" :
+                        op = "\tsub ebx, eax\n" +
+                                "\tmov eax, ebx\n";
+                        break;
+                    case "%" :
+                        op = "\tmov ecx,eax\n" +
+                                "\tdiv ecx,ebx\n" +
+                                "\tmul ecx,ebx\n" +
+                                "\tsub eax,ecx\n";
+                        break;
+                }
+                return this.fil1.toString() +
+                        "\tpush eax\n" +
+                        this.fil2.toString()  +
+                        "\tpop ebx\n" +
+                        op;
+            case COMPARATOR:
+                String cp = "";
+                switch (this.value.toString()) {
+                    case "=" :
+                        cp = "";
+                        break;
+                    case ">" :
+                        cp = "";
+                        break;
+                    case ">=" :
+                        cp = "";
+                        break;
+                }
+                return this.fil1.toString() +
+                        "\tpush eax\n" +
+                        this.fil2.toString()  +
+                        "\tpop ebx\n" +
+                        cp;
+            default:
+                return "";
         }
-        return "";
     }
 
     private void toString(String indent) {

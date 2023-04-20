@@ -17,6 +17,8 @@ action code {:
 
     @Override
     public String toString() {
+        /*node.print();
+        return "";*/
         StringBuilder txt = new StringBuilder();
         txt.append("DATA SEGMENT\n");
         for (String v : var) {
@@ -58,6 +60,7 @@ parser code {:
 terminal PLUS, MOINS, MOINS_UNAIRE, MUL, DIV, MOD, NOT, OR, AND, PAR_G, PAR_D, SEMI, POINT, LET, INPUT, OUTPUT, IF, THEN, ELSE, WHILE, DO, EGAL, GT, GTE, NIL, ERROR;
 terminal Integer ENTIER;
 terminal String IDENT;
+
 /* non terminaux */
 non terminal Node sequence, expression, expr;
 non terminal program;
@@ -79,14 +82,14 @@ program ::=
     ;
 
 // une sequence est une suite d'instructions separes par des point virgules 
-sequence ::= expression:e1 SEMI sequence:e2 {: RESULT = new Node(Node.typeNode.PV, e1, e2); :}
+sequence ::= expression:e1 SEMI sequence:e2 {: RESULT = new Node(TypeNode.PV, e1, e2); :}
             | expression:e {: RESULT = e; :}
             ;
 
 // une expession est soit une affectation ,une              
 expression ::= expr:e {: RESULT = e; :}
              | LET IDENT:nom EGAL expr:e  {:
-                    RESULT = new Node(Node.typeNode.LET, new Node(nom), e);
+                    RESULT = new Node(TypeNode.LET, new Node(nom), e);
                     if (!var.contains(nom)) var.add(nom);
                 :}
              | WHILE expr:cond DO expression:e {: RESULT = new Node("while", cond, e); :}
@@ -99,19 +102,19 @@ expression ::= expr:e {: RESULT = e; :}
 expr ::= NOT expr:e {: RESULT = new Node("!", e, new Node()); :}
        | expr:e1 AND expr:e2 {: RESULT = new Node("&&", e1, e2); :}
        | expr:e1 OR expr:e2 {: RESULT = new Node("||", e1, e2); :}
-       | expr:e1 EGAL expr:e2 {: RESULT = new Node("=", e1, e2); :}
-       | expr:e1 GT expr:e2 {: RESULT = new Node(">", e1, e2); :}
-       | expr:e1 GTE expr:e2 {: RESULT = new Node(">=", e1, e2); :}
-       | expr:e1 PLUS expr:e2 {: RESULT = new Node(Node.typeNode.PLUS, "+", e1, e2); :}
-       | expr:e1 MOINS expr:e2 {: RESULT = new Node(Node.typeNode.MOINS, "-", e1, e2); :}
-       | expr:e1 MUL expr:e2 {: RESULT = new Node(Node.typeNode.MUL, "*", e1, e2); :}
-       | expr:e1 DIV expr:e2 {: RESULT = new Node(Node.typeNode.DIV, "/", e1, e2); :}
-       | expr:e1 MOD expr:e2 {: RESULT = new Node("%", e1, e2); :}
+       | expr:e1 EGAL expr:e2 {: RESULT = new Node(TypeNode.COMPARATOR, "=", e1, e2); :}
+       | expr:e1 GT expr:e2 {: RESULT = new Node(TypeNode.COMPARATOR, ">", e1, e2); :}
+       | expr:e1 GTE expr:e2 {: RESULT = new Node(TypeNode.COMPARATOR, ">=", e1, e2); :}
+       | expr:e1 PLUS expr:e2 {: RESULT = new Node(TypeNode.OPERATOR, "+", e1, e2); :}
+       | expr:e1 MOINS expr:e2 {: RESULT = new Node(TypeNode.OPERATOR, "-", e1, e2); :}
+       | expr:e1 MUL expr:e2 {: RESULT = new Node(TypeNode.OPERATOR, "*", e1, e2); :}
+       | expr:e1 DIV expr:e2 {: RESULT = new Node(TypeNode.OPERATOR, "/", e1, e2); :}
+       | expr:e1 MOD expr:e2 {: RESULT = new Node(TypeNode.OPERATOR, "%", e1, e2); :}
        | MOINS expr:e {: RESULT = new Node(e); :}             %prec MOINS_UNAIRE
        | OUTPUT expr:e {: RESULT = new Node("output", e, new Node()); :}
        | INPUT {: RESULT = new Node("input");:}
        | NIL {: RESULT = new Node("nil"); :}
-       | ENTIER:n {: RESULT = new Node(Node.typeNode.VALUE, n); :}
-       | IDENT:id {: RESULT = new Node(Node.typeNode.VAR, id); :}
+       | ENTIER:n {: RESULT = new Node(TypeNode.VALUE, n); :}
+       | IDENT:id {: RESULT = new Node(TypeNode.VAR, id); :}
        | PAR_G sequence:e PAR_D {: RESULT = e; :}
        ;
