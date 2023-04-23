@@ -92,7 +92,7 @@ expression ::= expr:e {: RESULT = e; :}
                     RESULT = new Node(TypeNode.LET, new Node(nom), e);
                     if (!var.contains(nom)) var.add(nom);
                 :}
-             | WHILE expr:cond DO expression:e {: RESULT = new Node("while", cond, e); :}
+             | WHILE expr:cond DO expression:e {: RESULT = new Node(TypeNode.WHILE, cond, e); :}
              | IF expr:cond THEN expression:a1 ELSE expression:a2
                 {: RESULT = new Node("if", cond, new Node("then/else", a1, a2)); :}
              | error // reprise d'erreurs
@@ -103,16 +103,16 @@ expr ::= NOT expr:e {: RESULT = new Node("!", e, new Node()); :}
        | expr:e1 AND expr:e2 {: RESULT = new Node("&&", e1, e2); :}
        | expr:e1 OR expr:e2 {: RESULT = new Node("||", e1, e2); :}
        | expr:e1 EGAL expr:e2 {: RESULT = new Node(TypeNode.COMPARATOR, "=", e1, e2); :}
-       | expr:e1 GT expr:e2 {: RESULT = new Node(TypeNode.COMPARATOR, ">", e1, e2); :}
-       | expr:e1 GTE expr:e2 {: RESULT = new Node(TypeNode.COMPARATOR, ">=", e1, e2); :}
+       | expr:e1 GT expr:e2 {: RESULT = new Node(TypeNode.COMPARATOR, "<", e1, e2); :}
+       | expr:e1 GTE expr:e2 {: RESULT = new Node(TypeNode.COMPARATOR, "<=", e1, e2); :}
        | expr:e1 PLUS expr:e2 {: RESULT = new Node(TypeNode.OPERATOR, "+", e1, e2); :}
        | expr:e1 MOINS expr:e2 {: RESULT = new Node(TypeNode.OPERATOR, "-", e1, e2); :}
        | expr:e1 MUL expr:e2 {: RESULT = new Node(TypeNode.OPERATOR, "*", e1, e2); :}
        | expr:e1 DIV expr:e2 {: RESULT = new Node(TypeNode.OPERATOR, "/", e1, e2); :}
        | expr:e1 MOD expr:e2 {: RESULT = new Node(TypeNode.OPERATOR, "%", e1, e2); :}
        | MOINS expr:e {: RESULT = new Node(e); :}             %prec MOINS_UNAIRE
-       | OUTPUT expr:e {: RESULT = new Node("output", e, new Node()); :}
-       | INPUT {: RESULT = new Node("input");:}
+       | OUTPUT expr:e {: RESULT = new Node(TypeNode.OUTPUT, e, new Node()); :}
+       | INPUT {: RESULT = new Node(TypeNode.INPUT);:}
        | NIL {: RESULT = new Node("nil"); :}
        | ENTIER:n {: RESULT = new Node(TypeNode.VALUE, n); :}
        | IDENT:id {: RESULT = new Node(TypeNode.VAR, id); :}

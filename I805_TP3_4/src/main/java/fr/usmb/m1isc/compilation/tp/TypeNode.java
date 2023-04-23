@@ -8,8 +8,8 @@ public enum TypeNode {
     VAR,
     OPERATOR,
     COMPARATOR,
-
     WHILE,
-
-    IF
+    IF,
+    OUTPUT,
+    INPUT
 }

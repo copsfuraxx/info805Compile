@@ -1,8 +1,8 @@
 package fr.usmb.m1isc.compilation.tp;
 
 public class Node {
-    private static int idWhile = 1;
-    private static int idIf = 1;
+    private static int idWhile = 0;
+    private static int idIf = 0;
 
     private int id;
 
@@ -13,6 +13,13 @@ public class Node {
 
     public Node() {
         type = TypeNode.NONE;
+        value = null;
+        fil1 = null;
+        fil2 = null;
+    }
+
+    public Node(TypeNode type) {
+        this.type = type;
         value = null;
         fil1 = null;
         fil2 = null;
@@ -73,6 +80,11 @@ public class Node {
                 return "\tmov eax, " + this.value + "\n";
             case VALUE:
                 return "\tmov eax, " + this.value + "\n";
+            case OUTPUT:
+                return this.fil1.toString() +
+                        "\tout eax\n";
+            case INPUT:
+                return "\tin eax\n";
             case OPERATOR:
                 String op = "";
                 switch (this.value.toString()) {
@@ -91,10 +103,11 @@ public class Node {
                                 "\tmov eax, ebx\n";
                         break;
                     case "%" :
-                        op = "\tmov ecx,eax\n" +
-                                "\tdiv ecx,ebx\n" +
-                                "\tmul ecx,ebx\n" +
-                                "\tsub eax,ecx\n";
+                        op = "\tmov ecx,ebx\n" +
+                                "\tdiv ecx,eax\n" +
+                                "\tmul ecx,eax\n" +
+                                "\tsub ebx,ecx\n" +
+                                "\tmov eax,ebx\n";
                         break;
                 }
                 return this.fil1.toString() +
@@ -106,20 +119,35 @@ public class Node {
                 String cp = "";
                 switch (this.value.toString()) {
                     case "=" :
-                        cp = "";
+                        cp = "\tjz ";
                         break;
-                    case ">" :
-                        cp = "";
+                    case "<" :
+                        cp = "\tjle ";
                         break;
-                    case ">=" :
-                        cp = "";
+                    case "<=" :
+                        cp = "\tjl ";
                         break;
                 }
                 return this.fil1.toString() +
                         "\tpush eax\n" +
                         this.fil2.toString()  +
                         "\tpop ebx\n" +
+                        "\tsub eax,ebx\n" +
                         cp;
+            case WHILE:
+                idWhile++;
+                return "debut_while_" + idWhile + ":\n" +
+                        this.fil1.toString() + "faux_gt_\" + idWhile + \"\n" +
+                        "\tmov eax,1\n" +
+                        "\tjmp sortie_gt_\" + idWhile + \"\n" +
+                        "faux_gt_\" + idWhile + \":\n" +
+                        "\tmov eax,0\n" +
+                        "sortie_gt_\" + idWhile + \":\n" +
+                        "\tjz sortie_while_\" + idWhile + \"\n" +
+                        this.fil2.toString() +
+                        "\tjmp debut_while_\" + idWhile + \"\n" +
+                        "sortie_while_\" + idWhile + \":\n";
+
             default:
                 return "";
         }
