@@ -9,7 +9,10 @@ public enum TypeNode {
     OPERATOR,
     COMPARATOR,
     WHILE,
-    IF,
+    IF_THEN_ELSE,
     OUTPUT,
-    INPUT
+    INPUT,
+    IF_THEN,
+    THEN_ELSE,
+    MOINS_UNAIRE
 }

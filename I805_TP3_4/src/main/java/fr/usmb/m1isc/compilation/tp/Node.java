@@ -20,7 +20,7 @@ public class Node {
 
     public Node(TypeNode type) {
         this.type = type;
-        value = null;
+        value = type;
         fil1 = null;
         fil2 = null;
     }
@@ -65,7 +65,7 @@ public class Node {
     }
 
     public void print() {
-        toString("");
+        toArbre("");
     }
 
     @Override
@@ -80,6 +80,12 @@ public class Node {
                 return "\tmov eax, " + this.value + "\n";
             case VALUE:
                 return "\tmov eax, " + this.value + "\n";
+            case MOINS_UNAIRE:
+                return "\tmov eax, " + this.value + "\n" +
+                        "\tpush eax\n" +
+                        "\tmov eax, 0\n" +
+                        "\tpop ebx\n" +
+                        "\tsub eax, ebx\n";
             case OUTPUT:
                 return this.fil1.toString() +
                         "\tout eax\n";
@@ -137,27 +143,52 @@ public class Node {
             case WHILE:
                 idWhile++;
                 return "debut_while_" + idWhile + ":\n" +
-                        this.fil1.toString() + "faux_gt_\" + idWhile + \"\n" +
+                        this.fil1.toString() + "faux_gt_" + idWhile + "\n" +
                         "\tmov eax,1\n" +
-                        "\tjmp sortie_gt_\" + idWhile + \"\n" +
-                        "faux_gt_\" + idWhile + \":\n" +
+                        "\tjmp sortie_gt_" + idWhile + "\n" +
+                        "faux_gt_" + idWhile + ":\n" +
                         "\tmov eax,0\n" +
-                        "sortie_gt_\" + idWhile + \":\n" +
-                        "\tjz sortie_while_\" + idWhile + \"\n" +
+                        "sortie_gt_" + idWhile + ":\n" +
+                        "\tjz sortie_while_" + idWhile + "\n" +
                         this.fil2.toString() +
-                        "\tjmp debut_while_\" + idWhile + \"\n" +
-                        "sortie_while_\" + idWhile + \":\n";
-
+                        "\tjmp debut_while_" + idWhile + "\n" +
+                        "sortie_while_" + idWhile + ":\n";
+            case IF_THEN:
+                idIf++;
+                return "cond_if_" + idIf + ":\n" +
+                        this.fil1.toString() + "sortie_if_" + idIf + "\n" +
+                        "\tjmp then_if_" + idIf + "\n" +
+                        "then_if_" + idIf + ":\n" +
+                        this.fil2.toString() +
+                        "\tjmp sortie_if_" + idIf + "\n" +
+                        "sortie_if_" + idIf + ":\n";
+            case IF_THEN_ELSE:
+                idIf++;
+                return "cond_if_" + idIf + ":\n" +
+                        this.fil1.toString() + "else_if_" + idIf + "\n" +
+                        "\tjmp then_if_" + idIf + "\n" +
+                        this.fil2.toString() +
+                        "sortie_if_" + idIf + ":\n";
+            case THEN_ELSE:
+                return "then_if_" + idIf + ":\n" +
+                        this.fil1.toString() +
+                        "\tjmp sortie_if_" + idIf + "\n" +
+                        "else_if_" + idIf + ":\n" +
+                        this.fil2.toString() +
+                        "\tjmp sortie_if_" + idIf + "\n";
             default:
                 return "";
         }
     }
 
-    private void toString(String indent) {
+    private void toArbre(String indent) {
         if (value != null) {
-            if (fil1 != null) fil1.toString(indent + "    ");
-            System.out.println(indent + value);
-            if (fil2 != null)fil2.toString(indent + "    ");
+            if (fil1 != null) fil1.toArbre(indent + "    ");
+            if(type == TypeNode.MOINS_UNAIRE)
+                System.out.println(indent + "-" + value);
+            else
+                System.out.println(indent + value);
+            if (fil2 != null)fil2.toArbre(indent + "    ");
         }
     }
 }

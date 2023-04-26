@@ -30,6 +30,7 @@ do          = "do" | "DO"
 if          = "if" | "IF"
 then        = "then" | "THEN"
 else        = "else" | "ELSE"
+endif        = "endif" | "ENDIF"
 input       = "input" | "INPUT"
 output      = "output" | "OUTPUT"
 nil         = "nil" | "NIL"
@@ -54,6 +55,7 @@ comment     = {comment1}|{comment2}
 {if}        { return new Symbol(sym.IF, yyline, yycolumn) ;}
 {then}      { return new Symbol(sym.THEN, yyline, yycolumn) ;}
 {else}      { return new Symbol(sym.ELSE, yyline, yycolumn) ;}
+{endif}      { return new Symbol(sym.ENDIF, yyline, yycolumn) ;}
 {nil}       { return new Symbol(sym.NIL, yyline, yycolumn) ;}
 {input}     { return new Symbol(sym.INPUT, yyline, yycolumn) ;}
 {output}    { return new Symbol(sym.OUTPUT, yyline, yycolumn) ;}
@@ -67,6 +69,7 @@ comment     = {comment1}|{comment2}
 ")"         { return new Symbol(sym.PAR_D, yyline, yycolumn) ;}
 "+"         { return new Symbol(sym.PLUS, yyline, yycolumn) ;}
 "-"         { return new Symbol(sym.MOINS, yyline, yycolumn) ;}
+"-"         { return new Symbol(sym.MOINS_UNAIRE, yyline, yycolumn) ;}
 "/"         { return new Symbol(sym.DIV, yyline, yycolumn) ;}
 {mod}       { return new Symbol(sym.MOD, yyline, yycolumn) ;}
 "*"         { return new Symbol(sym.MUL, yyline, yycolumn) ;}
